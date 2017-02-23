@@ -13,10 +13,10 @@ const (
 	APIVersion = "1.24"
 )
 
-func stats(containerID string) (v *types.StatsJSON, err error) {
+func stats(containerID string) (*types.StatsJSON, error) {
 	cli, err := client.NewClient(client.DefaultDockerHost, APIVersion, nil, nil)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer func() {
 		if err = cli.Close(); err != nil {
@@ -26,7 +26,7 @@ func stats(containerID string) (v *types.StatsJSON, err error) {
 
 	resp, err := cli.ContainerStats(context.Background(), containerID, false)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer func() {
 		if err = resp.Body.Close(); err != nil {
@@ -34,11 +34,12 @@ func stats(containerID string) (v *types.StatsJSON, err error) {
 		}
 	}()
 
-	if err = json.NewDecoder(resp.Body).Decode(v); err != nil {
-		return
+	var v types.StatsJSON
+	if err = json.NewDecoder(resp.Body).Decode(&v); err != nil {
+		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
 func inspect(containerID string) (*types.ContainerJSON, error) {
