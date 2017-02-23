@@ -2,10 +2,10 @@ package docker
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 
-	// "github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"gitlab.yxapp.in/kaizhang33/sysmonitor/item"
 )
@@ -27,21 +27,25 @@ func Monitor(containerID string, key item.Key) (value string, err error) {
 		}
 	}()
 
-	stats, err := cli.ContainerStats(context.Background(), containerID, false)
+	resp, err := cli.ContainerStats(context.Background(), containerID, false)
 	if err != nil {
 		return
 	}
 	defer func() {
-		if err = stats.Body.Close(); err != nil {
+		if err = resp.Body.Close(); err != nil {
 			fmt.Println(err)
 		}
 	}()
 
-	b, err := ioutil.ReadAll(stats.Body)
-	if err != nil {
+	var stats types.StatsJSON
+
+	if err = json.NewDecoder(resp.Body).Decode(&stats); err != nil {
 		return
 	}
-	value = string(b)
+
+	fmt.Printf("CPUStats: %+v.\n", stats.CPUStats)
+	fmt.Printf("MemoryStats: %+v.\n", stats.MemoryStats)
+	fmt.Printf("Networks: %+v.\n", stats.Networks)
 
 	return
 }

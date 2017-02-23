@@ -38,7 +38,6 @@ func init() {
 }
 
 func monitorDocker(cmd *cobra.Command, args []string) error {
-	fmt.Printf("args: %v.", args)
 	if len(args) != 2 {
 		return errInvalidArgsNumber
 	}
@@ -53,6 +52,6 @@ func monitorDocker(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Println(value)
+	fmt.Println("value: ", value)
 	return nil
 }
