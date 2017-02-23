@@ -10,7 +10,7 @@ import (
 
 const (
 	dockerUsage = `Usage:
-  sysmonitor docker containerName key
+  sudo sysmonitor docker containerName key
 key's choices are:
 {
     cpu_total_usage,
@@ -52,6 +52,6 @@ func monitorDocker(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Println("value: ", value)
+	fmt.Println(value)
 	return nil
 }

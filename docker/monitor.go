@@ -1,7 +1,7 @@
 package docker
 
 import (
-	"fmt"
+	"encoding/json"
 	"strconv"
 
 	"gitlab.yxapp.in/kaizhang33/sysmonitor/item"
@@ -96,7 +96,12 @@ func Monitor(containerName string, key item.Key) (value string, err error) {
 			return "", err
 		}
 
-		value = fmt.Sprintf("%+v", info.Config.Volumes)
+		bs, err := json.Marshal(info.Config.Volumes)
+		if err != nil {
+		}
+		value = string(bs)
+	default:
+		return "", item.ErrInvalidKey
 	}
 
 	return value, nil
