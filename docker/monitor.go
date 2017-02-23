@@ -1,9 +1,9 @@
 package docker
 
 import (
-	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 
 	"gitlab.yxapp.in/kaizhang33/sysmonitor/item"
 	"gitlab.yxapp.in/kaizhang33/sysmonitor/lain"
@@ -105,10 +105,7 @@ func Monitor(containerName string, key item.Key) (value string, err error) {
 			return "", err
 		}
 
-		bs, err := json.Marshal(info.Config.Volumes)
-		if err != nil {
-		}
-		value = string(bs)
+		value = strings.Join(info.HostConfig.Binds, ", ")
 	default:
 		return "", item.ErrInvalidKey
 	}
