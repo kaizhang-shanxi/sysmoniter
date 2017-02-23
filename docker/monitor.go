@@ -2,6 +2,7 @@ package docker
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 
 	"gitlab.yxapp.in/kaizhang33/sysmonitor/item"
@@ -13,6 +14,10 @@ const (
 	floatFmt     = 'f'
 	floatPrec    = 2
 	floatBitSize = 64
+)
+
+var (
+	errInvalidNetworks = errors.New("invalid networks")
 )
 
 // Monitor 监控容器信息
@@ -63,14 +68,14 @@ func Monitor(containerName string, key item.Key) (value string, err error) {
 			return "", err
 		}
 		rxBytes := calculateNetworkRxBytes(v.Networks)
-		value = strconv.FormatFloat(rxBytes, floatFmt, floatPrec, floatBitSize)
+		value = strconv.FormatUint(rxBytes, intBase)
 	case item.NetworkTxBytes:
 		v, err := stats(containerName)
 		if err != nil {
 			return "", err
 		}
 		txBytes := calculateNetworkTxBytes(v.Networks)
-		value = strconv.FormatFloat(txBytes, floatFmt, floatPrec, floatBitSize)
+		value = strconv.FormatUint(txBytes, intBase)
 	case item.NetworkIP:
 		appName, err := lain.ParseAppName(containerName)
 		if err != nil {
@@ -82,7 +87,11 @@ func Monitor(containerName string, key item.Key) (value string, err error) {
 			return "", err
 		}
 
-		value = info.NetworkSettings.Networks[appName].IPAddress
+		network, ok := info.NetworkSettings.Networks[appName]
+		if !ok {
+			return "", errInvalidNetworks
+		}
+		value = network.IPAddress
 	case item.ConImage:
 		info, err := inspect(containerName)
 		if err != nil {
